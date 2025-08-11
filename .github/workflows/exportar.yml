@@ -1,1 +1,32 @@
+name: Exportar Notion -> Pages
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # cada 6 horas (UTC)
+  workflow_dispatch:       # permite ejecutar manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with: python-version: "3.10"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run export script
+        run: python scripts/exportar.py
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
 
