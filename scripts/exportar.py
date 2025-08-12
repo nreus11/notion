@@ -8,7 +8,7 @@ import plotly.express as px
 # ---------------------------
 # Debes configurarlas en GitHub como "Secrets"
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
-DATABASE_ID = os.environ.get("NOTION_DATABASE_ID")
+DATABASE_ID = os.environ.get("DATABASE_ID")
 
 # ---------------------------
 # 2. CREAR CARPETA PARA PUBLICAR
