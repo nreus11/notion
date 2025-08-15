@@ -1,56 +1,101 @@
 import os
 import requests
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
 
-# Variables de entorno
-NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
+# ---------------------------
+# 1. VARIABLES DE ENTORNO
+# ---------------------------
+# Debes configurarlas en GitHub como "Secrets"
+NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
+DATABASE_ID = os.environ.get("DATABASE_ID")
 
-headers = {
-    "Authorization": f"Bearer {NOTION_TOKEN}",
-    "Notion-Version": "2022-06-28",
-    "Content-Type": "application/json"
-}
-
-# Obtener datos de Notion
-url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
-response = requests.post(url, headers=headers)
-response.raise_for_status()
-data = response.json()
-
-# Parsear resultados
-rows = []
-for result in data["results"]:
-    props = result["properties"]
-    nombre = props["Nombre"]["title"][0]["plain_text"] if props["Nombre"]["title"] else ""
-    cantidad = props["Cantidad"]["number"] or 0
-    fecha = props["Fecha del gasto"]["date"]["start"] if props["Fecha del gasto"]["date"] else None
-    cuenta = props["Cuenta"]["rich_text"][0]["plain_text"] if props["Cuenta"]["rich_text"] else ""
-    categoria = props["Categoría"]["rich_text"][0]["plain_text"] if props["Categoría"]["rich_text"] else ""
-    formula = props["Fórmula"]["formula"]["string"] if props["Fórmula"]["formula"]["string"] else ""
-    
-    rows.append({
-        "Nombre": nombre,
-        "Cantidad": cantidad,
-        "Fecha": fecha,
-        "Cuenta": cuenta,
-        "Categoría": categoria,
-        "Fórmula": formula
-    })
-
-df = pd.DataFrame(rows)
-
-# Crear gráfico con Plotly
-fig = px.bar(df, x="Categoría", y="Cantidad", color="Categoría",
-             title="Gastos por Categoría", text_auto=True)
-
-# Guardar HTML con gráfico
-html_content = fig.to_html(full_html=True)
-
-# Crear carpeta y guardar index.html
+# ---------------------------
+# 2. CREAR CARPETA PARA PUBLICAR
+# ---------------------------
 os.makedirs("site", exist_ok=True)
-with open("site/index.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
 
-print("✅ Página generada con gráfico en site/index.html")
+# ---------------------------
+# 3. FUNCIÓN PARA EXTRAER DATOS
+# ---------------------------
+def obtener_datos_notion():
+    url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+    headers = {
+        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Notion-Version": "2022-06-28",
+        "Content-Type": "application/json"
+    }
+    response = requests.post(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+# ---------------------------
+# 4. PROCESAR DATOS
+# ---------------------------
+def procesar_datos(data):
+    rows = []
+    for result in data["results"]:
+        props = result["properties"]
+
+        nombre = ""
+        if props.get("Nombre") and props["Nombre"]["title"]:
+            nombre = props["Nombre"]["title"][0]["plain_text"]
+
+        cantidad = props.get("Cantidad", {}).get("number")
+
+        fecha_gasto = ""
+        if props.get("Fecha del gasto", {}).get("date"):
+            fecha_gasto = props["Fecha del gasto"]["date"]["start"]
+
+        cuenta = ""
+        if props.get("Cuenta", {}).get("rich_text"):
+            cuenta = props["Cuenta"]["rich_text"][0]["plain_text"]
+
+        categoria = ""
+        if props.get("Categoría", {}).get("rich_text"):
+            categoria = props["Categoría"]["rich_text"][0]["plain_text"]
+
+        formula = ""
+        if props.get("Fórmula", {}).get("rich_text"):
+            formula = props["Fórmula"]["rich_text"][0]["plain_text"]
+
+        rows.append({
+            "Nombre": nombre,
+            "Cantidad": cantidad,
+            "Fecha del gasto": fecha_gasto,
+            "Cuenta": cuenta,
+            "Categoría": categoria,
+            "Fórmula": formula
+        })
+
+    return pd.DataFrame(rows)
+
+# ---------------------------
+# 5. CREAR GRÁFICO
+# ---------------------------
+def crear_grafico(df):
+    df["Fecha del gasto"] = pd.to_datetime(df["Fecha del gasto"], errors="coerce")
+    fig = px.bar(
+        df,
+        x="Fecha del gasto",
+        y="Cantidad",
+        color="Categoría",
+        hover_data=["Nombre", "Cuenta", "Fórmula"],
+        title="Gastos por fecha y categoría"
+    )
+    fig.write_html("site/index.html", include_plotlyjs="cdn")
+
+# ---------------------------
+# 6. EJECUCIÓN PRINCIPAL
+# ---------------------------
+if __name__ == "__main__":
+    print("📡 Obteniendo datos desde Notion...")
+    data = obtener_datos_notion()
+
+    print("📊 Procesando datos...")
+    df = procesar_datos(data)
+
+    print("📈 Creando gráfico...")
+    crear_grafico(df)
+
+    print("✅ Listo. Archivo guardado en site/index.html")
