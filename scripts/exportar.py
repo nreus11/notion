@@ -40,24 +40,24 @@ def procesar_datos(data):
         nombre = ""
         if props.get("Nombre") and props["Nombre"]["title"]:
             nombre = props["Nombre"]["title"][0]["plain_text"]
-
-        cantidad = props.get("Cantidad", {}).get("number")
-
+            
+        cantidad = props.get("Cantidad").get("number")
+        
         fecha_gasto = ""
-        if props.get("Fecha del gasto", {}).get("date"):
-            fecha_gasto = props["Fecha del gasto"]["date"]["start"]
+        if props.get("Fecha del gasto").get("created_time"):
+            fecha_gasto = props["Fecha del gasto"]["created_time"]
 
         cuenta = ""
-        if props.get("Cuenta", {}).get("rich_text"):
-            cuenta = props["Cuenta"]["rich_text"][0]["plain_text"]
+        if props.get("Cuenta") and props["Cuenta"]["select"]:
+            cuenta = props["Cuenta"]["select"]["name"]
 
         categoria = ""
-        if props.get("Categoría", {}).get("rich_text"):
-            categoria = props["Categoría"]["rich_text"][0]["plain_text"]
+        if props.get("Categoría") and props["Categoría"]["select"]:
+            categoria = props["Categoría"]["select"]["name"]
 
         formula = ""
-        if props.get("Fórmula", {}).get("rich_text"):
-            formula = props["Fórmula"]["rich_text"][0]["plain_text"]
+        if props.get("Fórmula") and props["Fórmula"]["formula"]:
+            formula = props["Fórmula"]["formula"]["string"]
 
         rows.append({
             "Nombre": nombre,
@@ -65,7 +65,7 @@ def procesar_datos(data):
             "Fecha del gasto": fecha_gasto,
             "Cuenta": cuenta,
             "Categoría": categoria,
-            "Fórmula": formula
+            "Tipo gasto": formula
         })
 
     return pd.DataFrame(rows)
@@ -80,7 +80,7 @@ def crear_grafico(df):
         x="Fecha del gasto",
         y="Cantidad",
         color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Fórmula"],
+        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
         title="Gastos por fecha y categoría"
     )
     fig.write_html("site/index.html", include_plotlyjs="cdn")
