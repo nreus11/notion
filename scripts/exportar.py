@@ -2,11 +2,12 @@ import os
 import requests
 import pandas as pd
 import plotly.express as px
+import hashlib  # Para verificar cambios
 
 # ---------------------------
 # 1. VARIABLES DE ENTORNO
 # ---------------------------
-# Debes configurarlas en GitHub como "Secrets"
+# Mantengo exactamente como tenías
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
 DATABASE_ID = os.environ.get("DATABASE_ID")
 
@@ -62,31 +63,87 @@ def procesar_datos(data):
         rows.append({
             "Nombre": nombre,
             "Cantidad": cantidad,
-            "Fecha del gasto": fecha_gasto,
+            "Fecha_del_gasto": fecha_gasto,
             "Cuenta": cuenta,
             "Categoría": categoria,
-            "Tipo gasto": formula
+            "Tipo_gasto": formula
         })
 
     return pd.DataFrame(rows)
 
 # ---------------------------
-# 5. CREAR GRÁFICO
+# 5. HASH PARA DETECTAR CAMBIOS
 # ---------------------------
-def crear_grafico(df):
-    df["Fecha del gasto"] = pd.to_datetime(df["Fecha del gasto"], errors="coerce")
-    fig = px.bar(
-        df,
-        x="Fecha del gasto",
-        y="Cantidad",
-        color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
-        title="Gastos por fecha y categoría"
-    )
-    fig.write_html("site/index.html", include_plotlyjs="cdn")
+def datos_cambiaron(df):
+    data_string = df.to_json()
+    data_hash = hashlib.md5(data_string.encode()).hexdigest()
+
+    hash_file = "site/data_hash.txt"
+    prev_hash = ""
+    if os.path.exists(hash_file):
+        with open(hash_file, "r") as f:
+            prev_hash = f.read().strip()
+
+    if data_hash == prev_hash:
+        return False  # No hay cambios
+    else:
+        with open(hash_file, "w") as f:
+            f.write(data_hash)
+        return True
 
 # ---------------------------
-# 6. EJECUCIÓN PRINCIPAL
+# 6. CREAR GRÁFICOS
+# ---------------------------
+def crear_dashboard(df):
+    df["Fecha_del_gasto"] = pd.to_datetime(df["Fecha_del_gasto"], errors="coerce")
+    df["Cantidad"] = pd.to_numeric(df["Cantidad"], errors="coerce").fillna(0)
+
+    # Gráfico de barras (como tenías)
+    fig_bar = px.bar(
+        df,
+        x="Fecha_del_gasto",
+        y="Cantidad",
+        color="Categoría",
+        hover_data=["Nombre", "Cuenta", "Tipo_gasto"],
+        title="Gastos por fecha y categoría"
+    )
+
+    # Gráfico de línea
+    fig_line = px.line(
+        df,
+        x="Fecha_del_gasto",
+        y="Cantidad",
+        color="Categoría",
+        markers=True,
+        title="Evolución de gastos"
+    )
+
+    # Pie chart por Tipo gasto
+    fig_pie = px.pie(
+        df,
+        names="Tipo_gasto",
+        values="Cantidad",
+        title="Distribución por Tipo de Gasto"
+    )
+
+    # Guardar todo en un solo HTML
+    with open("site/index.html", "w", encoding="utf-8") as f:
+        f.write("<html><head><meta charset='UTF-8'><title>Dashboard de Gastos</title></head><body>")
+        f.write("<h1>Dashboard de Gastos</h1>")
+
+        f.write("<h2>Gastos por fecha y categoría</h2>")
+        f.write(fig_bar.to_html(full_html=False, include_plotlyjs='cdn'))
+
+        f.write("<h2>Evolución de gastos</h2>")
+        f.write(fig_line.to_html(full_html=False, include_plotlyjs=False))
+
+        f.write("<h2>Distribución por Tipo de Gasto</h2>")
+        f.write(fig_pie.to_html(full_html=False, include_plotlyjs=False))
+
+        f.write("</body></html>")
+
+# ---------------------------
+# 7. EJECUCIÓN PRINCIPAL
 # ---------------------------
 if __name__ == "__main__":
     print("📡 Obteniendo datos desde Notion...")
@@ -95,7 +152,9 @@ if __name__ == "__main__":
     print("📊 Procesando datos...")
     df = procesar_datos(data)
 
-    print("📈 Creando gráfico...")
-    crear_grafico(df)
-
-    print("✅ Listo. Archivo guardado en site/index.html")
+    if not datos_cambiaron(df):
+        print("🔹 No hay cambios en los datos. No se actualiza dashboard.")
+    else:
+        print("📈 Creando dashboard...")
+        crear_dashboard(df)
+        print("✅ Dashboard actualizado en site/index.html")
