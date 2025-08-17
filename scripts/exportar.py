@@ -64,10 +64,10 @@ def procesar_datos(data):
         rows.append({
             "Nombre": nombre,
             "Cantidad": cantidad,
-            "Fecha_del_gasto": fecha_gasto,
+            "Fecha del gasto": fecha_gasto,
             "Cuenta": cuenta,
             "Categoría": categoria,
-            "Tipo_gasto": formula
+            "Tipo gasto": formula
         })
 
     return pd.DataFrame(rows)
@@ -97,12 +97,12 @@ def datos_cambiaron(df):
 # ---------------------------
 def info_mes(df):
     
-    df["Fecha_del_gasto"] = df["Fecha_del_gasto"].dt.tz_convert(None)
-    ultimo_mes = df["Fecha_del_gasto"].dt.to_period("M").max()
+    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
+    ultimo_mes = df["Fecha del gasto"].dt.to_period("M").max()
     ultimo_mes_nombre = ultimo_mes.strftime("%B %Y").capitalize()
     # Filtrar solo los datos de ese mes
-    df_ultimo_mes = df[df["Fecha_del_gasto"].dt.to_period("M") == ultimo_mes]
-    df_ultimo_mes["Mes"] = df_ultimo_mes["Fecha_del_gasto"].dt.to_period("M").astype(str)
+    df_ultimo_mes = df[df["Fecha del gasto"].dt.to_period("M") == ultimo_mes]
+    df_ultimo_mes["Mes"] = df_ultimo_mes["Fecha del gasto"].dt.to_period("M").astype(str)
 
     #agrupados
     df_agrupado_cat = df_ultimo_mes.groupby(["Mes", "Categoría"], as_index=False)["Cantidad"].sum()
