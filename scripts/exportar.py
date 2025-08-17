@@ -140,7 +140,7 @@ def info_mes(df):
      # Gráfico de línea
     fig_line = px.line(
         df,
-        x="Fecha_del_gasto",
+        x="Fecha del gasto",
         y="Cantidad",
         color="Categoría",
         markers=True,
