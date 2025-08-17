@@ -117,6 +117,8 @@ def crear_dashboard(df):
     )
     fig2.write_html("site/gastos_por_cuenta.html", include_plotlyjs="cdn")
 
+
+
     # 3. Gastos por categoría (pie chart)
     fig3 = px.pie(
         df,
@@ -125,6 +127,16 @@ def crear_dashboard(df):
         title="Distribución de gastos por categoría"
     )
     fig3.write_html("site/gastos_por_categoria.html", include_plotlyjs="cdn")
+
+     # Gráfico de línea
+    fig_line = px.line(
+        df,
+        x="Fecha_del_gasto",
+        y="Cantidad",
+        color="Categoría",
+        markers=True,
+        title="Evolución de gastos"
+    )
 
 # ---------------------------
 # 7. EJECUCIÓN PRINCIPAL
