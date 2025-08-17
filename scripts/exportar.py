@@ -94,53 +94,37 @@ def datos_cambiaron(df):
 # ---------------------------
 # 6. CREAR GRÁFICOS
 # ---------------------------
-def crear_dashboard(df):
-    df["Fecha_del_gasto"] = pd.to_datetime(df["Fecha_del_gasto"], errors="coerce")
-    df["Cantidad"] = pd.to_numeric(df["Cantidad"], errors="coerce").fillna(0)
+def crear_graficos(df):
+    df["Fecha del gasto"] = pd.to_datetime(df["Fecha del gasto"], errors="coerce")
 
-    # Gráfico de barras (como tenías)
-    fig_bar = px.bar(
+    # 1. Gastos por fecha y categoría
+    fig1 = px.bar(
         df,
-        x="Fecha_del_gasto",
+        x="Fecha del gasto",
         y="Cantidad",
         color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Tipo_gasto"],
+        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
         title="Gastos por fecha y categoría"
     )
+    fig1.write_html("site/gastos_por_fecha.html", include_plotlyjs="cdn")
 
-    # Gráfico de línea
-    fig_line = px.line(
+    # 2. Gastos por cuenta (pie chart)
+    fig2 = px.pie(
         df,
-        x="Fecha_del_gasto",
-        y="Cantidad",
-        color="Categoría",
-        markers=True,
-        title="Evolución de gastos"
-    )
-
-    # Pie chart por Tipo gasto
-    fig_pie = px.pie(
-        df,
-        names="Tipo_gasto",
+        names="Cuenta",
         values="Cantidad",
-        title="Distribución por Tipo de Gasto"
+        title="Distribución de gastos por cuenta"
     )
+    fig2.write_html("site/gastos_por_cuenta.html", include_plotlyjs="cdn")
 
-    # Guardar todo en un solo HTML
-    with open("site/index.html", "w", encoding="utf-8") as f:
-        f.write("<html><head><meta charset='UTF-8'><title>Dashboard de Gastos</title></head><body>")
-        f.write("<h1>Dashboard de Gastos</h1>")
-
-        f.write("<h2>Gastos por fecha y categoría</h2>")
-        f.write(fig_bar.to_html(full_html=False, include_plotlyjs='cdn'))
-
-        f.write("<h2>Evolución de gastos</h2>")
-        f.write(fig_line.to_html(full_html=False, include_plotlyjs=False))
-
-        f.write("<h2>Distribución por Tipo de Gasto</h2>")
-        f.write(fig_pie.to_html(full_html=False, include_plotlyjs=False))
-
-        f.write("</body></html>")
+    # 3. Gastos por categoría (pie chart)
+    fig3 = px.pie(
+        df,
+        names="Categoría",
+        values="Cantidad",
+        title="Distribución de gastos por categoría"
+    )
+    fig3.write_html("site/gastos_por_categoria.html", include_plotlyjs="cdn")
 
 # ---------------------------
 # 7. EJECUCIÓN PRINCIPAL
