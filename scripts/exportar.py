@@ -153,15 +153,14 @@ def info_mes(df):
 
 
 def crear_dashboard(df):
-    df["Fecha_del_gasto"] = pd.to_datetime(df["Fecha_del_gasto"], errors="coerce")
 
     # 1. Gastos por fecha y categoría
     fig1 = px.bar(
         df,
-        x="Fecha_del_gasto",
+        x="Fecha del gasto",
         y="Cantidad",
         color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Tipo_gasto"],
+        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
         title="Gastos por fecha y categoría"
     )
     fig1.write_html("site/gastos_por_fecha.html", include_plotlyjs="cdn")
@@ -189,7 +188,7 @@ def crear_dashboard(df):
      # Gráfico de línea
     fig_line = px.line(
         df,
-        x="Fecha_del_gasto",
+        x="Fecha del gasto",
         y="Cantidad",
         color="Categoría",
         markers=True,
