@@ -94,7 +94,7 @@ def datos_cambiaron(df):
 # ---------------------------
 # 6. CREAR GRÁFICOS
 # ---------------------------
-def crear_graficos(df):
+def crear_dashboard(df):
     df["Fecha del gasto"] = pd.to_datetime(df["Fecha del gasto"], errors="coerce")
 
     # 1. Gastos por fecha y categoría
