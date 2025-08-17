@@ -95,15 +95,15 @@ def datos_cambiaron(df):
 # 6. CREAR GRÁFICOS
 # ---------------------------
 def crear_dashboard(df):
-    df["Fecha del gasto"] = pd.to_datetime(df["Fecha del gasto"], errors="coerce")
+    df["Fecha_del_gasto"] = pd.to_datetime(df["Fecha_del_gasto"], errors="coerce")
 
     # 1. Gastos por fecha y categoría
     fig1 = px.bar(
         df,
-        x="Fecha del gasto",
+        x="Fecha_del_gasto",
         y="Cantidad",
         color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
+        hover_data=["Nombre", "Cuenta", "Tipo_gasto"],
         title="Gastos por fecha y categoría"
     )
     fig1.write_html("site/gastos_por_fecha.html", include_plotlyjs="cdn")
