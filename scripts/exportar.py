@@ -117,6 +117,16 @@ def info_mes(df):
         color="Categoría",
         title=f"Gastos del mes {ultimo_mes_nombre} agrupados por categoría"
     )
+    fig1.update_yaxes(tickprefix="$", tickformat=",")
+    fig1.update_traces(texttemplate='%{y}', textposition='outside')
+
+    fig1.update_layout(
+        title_font_size=20,
+        font=dict(family="Arial", size=12, color="white"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        bargap=0.2  # separación entre barras
+        )    
     fig1.write_html("site/gastos_mes.html", include_plotlyjs="cdn")
 
     # 2. Gastos por tipo (pie chart)
