@@ -169,7 +169,7 @@ def info_mes(df):
 
     # - Gráfico comparativo mes anterior
     # Crear columna de periodo (año-mes)
-    df["Mes"] = df["Fecha_del_gasto"].dt.to_period("M")
+    df["Mes"] = df["Fecha del gasto"].dt.to_period("M")
 
     # Determinar mes actual y mes anterior
     ultimo_mes = df["Mes"].max()
