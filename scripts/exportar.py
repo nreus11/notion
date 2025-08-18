@@ -167,6 +167,33 @@ def info_mes(df):
     )
     fig_line.write_html("site/index.html", include_plotlyjs="cdn")
 
+    # - Gráfico comparativo mes anterior
+    # Crear columna de periodo (año-mes)
+    df["Mes"] = df["Fecha_del_gasto"].dt.to_period("M")
+
+    # Determinar mes actual y mes anterior
+    ultimo_mes = df["Mes"].max()
+    mes_anterior = ultimo_mes - 1
+
+    # Filtrar solo esos 2 meses
+    df_filtrado = df[df["Mes"].isin([ultimo_mes, mes_anterior])]
+
+    # Agrupar por categoría y mes
+    df_agg = df_filtrado.groupby(["Categoría", "Mes"], as_index=False)["Cantidad"].sum()
+
+    # Convertir Mes a string legible (ej: "Agosto 2025")
+    df_agg["Mes"] = df_agg["Mes"].dt.strftime("%B %Y")
+    fig4 = px.bar(
+    df_agg,
+    x="Categoría",
+    y="Cantidad",
+    color="Mes",  # diferencia las barras por mes
+    barmode="group",  # barras una al lado de la otra
+    title="Comparación de gastos por categoría - Mes actual vs Mes anterior"
+    )
+    fig4 = aplicar_estilo(fig4, tipo="bar")
+    fig4.write_html("site/cat_mes_anterior.html", include_plotlyjs="cdn")
+
 
 
 
