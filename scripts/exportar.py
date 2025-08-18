@@ -124,22 +124,37 @@ def info_mes(df):
     df_agrupado_cat = df_agrupado_cat.sort_values(by="Cantidad", ascending=False)
     df_agrupado_tipo = df_ultimo_mes.groupby(["Mes", "Tipo gasto"], as_index=False)["Cantidad"].sum()
     df_agrupado_cuenta = df_ultimo_mes.groupby(["Mes", "Cuenta"], as_index=False)["Cantidad"].sum()
-        def aplicar_estilo(fig, tipo='bar'):
-        fig.update_layout(
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            title_font_size=20,
-            font=dict(family="Arial", size=12, color="white")
-        )
-    
-        if tipo == 'bar':
-            fig.update_yaxes(tickprefix="$", tickformat=",")
-            fig.update_traces(texttemplate='%{y}', textposition='outside')
-            fig.update_layout(bargap=0.2)
-        elif tipo == 'pie':
-            fig.update_traces(textinfo='percent+label')
-        return fig
 
+    # 1. Gastos por fecha y categoría
+    fig1 = px.bar(
+        df_agrupado_cat,
+        x="Categoría",
+        y="Cantidad",
+        color="Categoría",
+        title=f"Gastos del mes {ultimo_mes_nombre} agrupados por categoría"
+    )
+    fig1 = aplicar_estilo(fig1, tipo="bar")
+    fig1.write_html("site/gastos_mes.html", include_plotlyjs="cdn")
+
+    # 2. Gastos por tipo (pie chart)
+    fig2 = px.pie(
+        df_agrupado_tipo,
+        names="Tipo gasto",
+        values="Cantidad",
+        title="Distribución de gastos por tipo"
+    )
+    fig2 = aplicar_estilo(fig2, tipo="pie")
+    fig2.write_html("site/gastos_por_tipo_mes.html", include_plotlyjs="cdn")
+
+    # 3. Gastos por cuenta (pie chart)
+    fig3 = px.pie(
+        df_agrupado_cuenta,
+        names="Cuenta",
+        values="Cantidad",
+        title="Distribución de gastos por cuenta"
+    )
+    fig3 = aplicar_estilo(fig3, tipo="pie")
+    fig3.write_html("site/gastos_por_cuenta_mes.html", include_plotlyjs="cdn")
 
      # Gráfico de línea
     fig_line = px.line(
