@@ -191,7 +191,7 @@ def info_mes(df):
         title="Evolución de gastos"
     )
 
-    fig5 = aplicar_estilo(fig5, tipo="bar")
+    #fig5 = aplicar_estilo(fig5, tipo="bar")
     fig5.write_html("site/ev_gasto.html", include_plotlyjs="cdn")
         # - Gráfico comparativo mes anterior
     # Crear columna de periodo (año-mes)
