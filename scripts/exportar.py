@@ -115,8 +115,8 @@ def aplicar_estilo(fig, tipo='bar'):
 
 
 def info_mes(df):
-
-    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
+    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_localize(None)
+    #df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
     ultimo_mes = df["Fecha del gasto"].dt.to_period("M").max()
     ultimo_mes_nombre = ultimo_mes.strftime("%B %Y").capitalize()
 
