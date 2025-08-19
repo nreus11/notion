@@ -95,6 +95,24 @@ def datos_cambiaron(df):
 # ---------------------------
 # 6. CREAR GRÁFICOS
 # ---------------------------
+
+def aplicar_estilo(fig, tipo='bar'):
+    fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        title_font_size=20,
+        font=dict(family="Arial", size=12, color="white")
+    )
+    
+    if tipo == 'bar':
+        fig.update_yaxes(tickprefix="$", tickformat=",")
+        fig.update_traces(texttemplate='%{y}', textposition='outside')
+        fig.update_layout(bargap=0.2)
+    elif tipo == 'pie':
+        fig.update_traces(textinfo='percent+label')
+    return fig
+
+
 def info_mes(df):
 
     df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
