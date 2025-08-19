@@ -96,36 +96,26 @@ def datos_cambiaron(df):
 # 6. CREAR GRÁFICOS
 # ---------------------------
 def info_mes(df):
-    def aplicar_estilo(fig, tipo='bar'):
-        fig.update_layout(
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            title_font_size=20,
-            font=dict(family="Arial", size=12, color="white")
-        )
-    
-        if tipo == 'bar':
-            fig.update_yaxes(tickprefix="$", tickformat=",")
-            fig.update_traces(texttemplate='%{y}', textposition='outside')
-            fig.update_layout(bargap=0.2)
-        elif tipo == 'pie':
-            fig.update_traces(textinfo='percent+label')
-        return fig
-    
+
     df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
     ultimo_mes = df["Fecha del gasto"].dt.to_period("M").max()
     ultimo_mes_nombre = ultimo_mes.strftime("%B %Y").capitalize()
+
+
     # Filtrar solo los datos de ese mes
     df_ultimo_mes = df[df["Fecha del gasto"].dt.to_period("M") == ultimo_mes]
     df_ultimo_mes["Mes"] = df_ultimo_mes["Fecha del gasto"].dt.to_period("M").astype(str)
 
-    #agrupados
+    #agrupaciones
     df_agrupado_cat = df_ultimo_mes.groupby(["Mes", "Categoría"], as_index=False)["Cantidad"].sum()
     df_agrupado_cat = df_agrupado_cat.sort_values(by="Cantidad", ascending=False)
     df_agrupado_tipo = df_ultimo_mes.groupby(["Mes", "Tipo gasto"], as_index=False)["Cantidad"].sum()
+    df_agrupado_tipo = df_ultimo_mes.sort_values(by="Cantidad", ascending=False)
     df_agrupado_cuenta = df_ultimo_mes.groupby(["Mes", "Cuenta"], as_index=False)["Cantidad"].sum()
+    df_agrupado_cuenta = df_ultimo_mes.sort_values(by="Cantidad", ascending=False)
 
-    # 1. Gastos por fecha y categoría
+
+    # 1. Gastos por categoría
     fig1 = px.bar(
         df_agrupado_cat,
         x="Categoría",
@@ -156,18 +146,34 @@ def info_mes(df):
     fig3 = aplicar_estilo(fig3, tipo="pie")
     fig3.write_html("site/gastos_por_cuenta_mes.html", include_plotlyjs="cdn")
 
+
+
+    ### GRaficos 2
+    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
+    df["Mes"] = df["Fecha del gasto"].dt.strftime("%B %Y")
+
+
+    #agrupados
+    df_agrupado_cat = df.groupby(["Mes", "Categoría"], as_index=False)["Cantidad"].sum()
+    df_agrupado_cat = df_agrupado_cat.sort_values(by="Cantidad", ascending=False)
+    df_agrupado_tipo = df.groupby(["Mes", "Tipo gasto"], as_index=False)["Cantidad"].sum()
+    df_agrupado_tipo = df_agrupado_tipo.sort_values(by="Cantidad", ascending=False)
+    df_agrupado_cuenta = df.groupby(["Mes", "Cuenta"], as_index=False)["Cantidad"].sum()
+    df_agrupado_cuenta = df_agrupado_cuenta.sort_values(by="Cantidad", ascending=False)
+ 
      # Gráfico de línea
-    fig_line = px.line(
-        df,
-        x="Fecha del gasto",
+    fig5 = px.line(
+        df_agrupado_cat,
+        x="Mes",
         y="Cantidad",
         color="Categoría",
         markers=True,
         title="Evolución de gastos"
     )
-    fig_line.write_html("site/index.html", include_plotlyjs="cdn")
 
-    # - Gráfico comparativo mes anterior
+    fig5 = aplicar_estilo(fig5, tipo="bar")
+    fig5.write_html("site/ev_gasto.html", include_plotlyjs="cdn")
+        # - Gráfico comparativo mes anterior
     # Crear columna de periodo (año-mes)
     df["Mes"] = df["Fecha del gasto"].dt.to_period("M")
 
@@ -195,52 +201,6 @@ def info_mes(df):
     fig4.write_html("site/cat_mes_anterior.html", include_plotlyjs="cdn")
 
 
-
-
-
-def crear_dashboard(df):
-
-    # 1. Gastos por fecha y categoría
-    fig1 = px.bar(
-        df,
-        x="Fecha del gasto",
-        y="Cantidad",
-        color="Categoría",
-        hover_data=["Nombre", "Cuenta", "Tipo gasto"],
-        title="Gastos por fecha y categoría"
-    )
-    fig1.write_html("site/gastos_por_fecha.html", include_plotlyjs="cdn")
-
-    # 2. Gastos por cuenta (pie chart)
-    fig2 = px.pie(
-        df,
-        names="Cuenta",
-        values="Cantidad",
-        title="Distribución de gastos por cuenta"
-    )
-    fig2.write_html("site/gastos_por_cuenta.html", include_plotlyjs="cdn")
-
-
-
-    # 3. Gastos por categoría (pie chart)
-    fig3 = px.pie(
-        df,
-        names="Categoría",
-        values="Cantidad",
-        title="Distribución de gastos por categoría"
-    )
-    fig3.write_html("site/gastos_por_categoria.html", include_plotlyjs="cdn")
-
-     # Gráfico de línea
-    fig_line = px.line(
-        df,
-        x="Fecha del gasto",
-        y="Cantidad",
-        color="Categoría",
-        markers=True,
-        title="Evolución de gastos"
-    )
-
 # ---------------------------
 # 7. EJECUCIÓN PRINCIPAL
 # ---------------------------
@@ -255,6 +215,5 @@ if __name__ == "__main__":
         print("🔹 No hay cambios en los datos. No se actualiza dashboard.")
     else:
         print("📈 Creando dashboard...")
-        crear_dashboard(df)
         info_mes(df)
         print("✅ Dashboard actualizado en site/index.html")
