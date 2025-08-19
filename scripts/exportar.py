@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import plotly.express as px
 import hashlib  # Para verificar cambios
+from datetime import datetime
 
 # ---------------------------
 # 1. VARIABLES DE ENTORNO
