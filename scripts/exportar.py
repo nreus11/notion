@@ -168,7 +168,8 @@ def info_mes(df):
 
 
     ### GRaficos 2
-    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
+    df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_localize(None)
+    #df["Fecha del gasto"] = df["Fecha del gasto"].dt.tz_convert(None)
     df["Mes"] = df["Fecha del gasto"].dt.strftime("%B %Y")
 
 
