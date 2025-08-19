@@ -111,6 +111,13 @@ def aplicar_estilo(fig, tipo='bar'):
         fig.update_layout(bargap=0.2)
     elif tipo == 'pie':
         fig.update_traces(textinfo='percent+label')
+    elif tipo == 'line':
+        fig.update_traces(mode='lines+markers')  # Línea con puntos
+        fig.update_yaxes(tickprefix="$", tickformat=",")
+        fig.update_layout(
+            xaxis=dict(showgrid=False), 
+            yaxis=dict(showgrid=False)
+        )
     return fig
 
 
@@ -191,7 +198,7 @@ def info_mes(df):
         title="Evolución de gastos"
     )
 
-    #fig5 = aplicar_estilo(fig5, tipo="bar")
+    fig5 = aplicar_estilo(fig5, tipo="line")
     fig5.write_html("site/ev_gasto.html", include_plotlyjs="cdn")
         # - Gráfico comparativo mes anterior
     # Crear columna de periodo (año-mes)
