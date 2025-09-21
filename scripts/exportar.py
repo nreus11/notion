@@ -133,8 +133,8 @@ def info_mes(df):
     df_ultimo_mes["Mes"] = df_ultimo_mes["Fecha del gasto"].dt.to_period("M").astype(str)
 
     #agrupaciones
-    df_agrupado_cat = df_ultimo_mes.groupby(["Mes", "Categoría"], as_index=False)["Cantidad"].sum()
-    df_agrupado_cat = df_agrupado_cat.sort_values(by="Cantidad", ascending=False)
+    df_agrupado_cat_mes = df_ultimo_mes.groupby(["Mes", "Categoría"], as_index=False)["Cantidad"].sum()
+    df_agrupado_cat_mes = df_agrupado_cat_mes.sort_values(by="Cantidad", ascending=False)
     df_agrupado_tipo = df_ultimo_mes.groupby(["Mes", "Tipo gasto"], as_index=False)["Cantidad"].sum()
     df_agrupado_tipo = df_ultimo_mes.sort_values(by="Cantidad", ascending=False)
     df_agrupado_cuenta = df_ultimo_mes.groupby(["Mes", "Cuenta"], as_index=False)["Cantidad"].sum()
@@ -143,7 +143,7 @@ def info_mes(df):
 
     # 1. Gastos por categoría
     fig1 = px.bar(
-        df_agrupado_cat,
+        df_agrupado_cat_mes,
         x="Categoría",
         y="Cantidad",
         color="Categoría",
@@ -226,6 +226,133 @@ def info_mes(df):
     )
     fig4 = aplicar_estilo(fig4, tipo="bar")
     fig4.write_html("site/cat_mes_anterior.html", include_plotlyjs="cdn")
+
+    fig6 = go.Figure()
+
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 0, 'column': 0},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Gastos fijos'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Gastos Fijos"},
+        number= {"prefix": "$"},
+        delta = {'reference': 700000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 700000}}))
+    
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 0, 'column': 1},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Supermercado'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Supermercado"},
+        number= {"prefix": "$"},
+        delta = {'reference': 250000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 250000}}))
+
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 0, 'column': 3},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Comidas varias'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Comidas varias"},
+        number= {"prefix": "$"},
+        delta = {'reference': 150000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 150000}}))
+
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 0, 'column': 2},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Oficina'].sum()+df_agrupado_cat["Cantidad"][df_agrupado_cat["Categoría"]=='Transporte'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Oficina + Transporte"},
+        number= {"prefix": "$"},
+        delta = {'reference': 100000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 100000}}))
+    
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 0, 'column': 4},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Tenis'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Tenis"},
+        number= {"prefix": "$"},
+        delta = {'reference': 200000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 200000}}))
+    
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 1, 'column': 1},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Otros'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Otros"},
+        number= {"prefix": "$"},
+        delta = {'reference': 100000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 100000}}))
+    
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 1, 'column': 2},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Otros Nico'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Otros Nico"},
+        number= {"prefix": "$"},
+        delta = {'reference': 200000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 200000}}))
+    
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 1, 'column': 3},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Otros amorcito'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Otros amorcito"},
+        number= {"prefix": "$"},
+        delta = {'reference': 200000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 200000}}))
+
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 1, 'column': 4},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Ahorros'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Ahorros"},
+        number= {"prefix": "$"},
+        delta = {'reference': 250000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 250000}}))
+
+    fig6.add_trace(go.Indicator(
+        domain = {'row': 1, 'column': 0},
+        value = df_agrupado_cat_mes["Cantidad"][df_agrupado_cat_mes["Categoría"]=='Decoración e implementos'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Decoración e implementos"},
+        number= {"prefix": "$"},
+        delta = {'reference': 50000,
+                "increasing": {"color": "red"},
+                "decreasing": {"color": "green"}},
+        gauge = {'axis': {'range': [None, 1000000]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 50000}}))
+    fig6.update_layout(
+        grid = {'rows': 2, 'columns': 5, 'pattern': "independent"})
+    fig6.write_html("site/dashboard.html", include_plotlyjs="cdn")
+
+
 
 
 # ---------------------------
