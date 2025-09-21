@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import plotly.express as px
 import hashlib  # Para verificar cambios
+import plotly.graph_objects as go
 from datetime import datetime
 
 # ---------------------------
