@@ -28,40 +28,61 @@ def obtener_datos_notion():
         "Notion-Version": "2022-06-28",
         "Content-Type": "application/json"
     }
-    response = requests.post(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
+    all_results = []
+    start_cursor = None
+    while True:
+        data = {}
+        if start_cursor:
+            data["start_cursor"] = start_cursor
+        
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        res_json = response.json()
+        # Guardar los resultados
+        all_results.extend(res_json.get("results", []))
+        # Revisar si hay más páginas
+        if not res_json.get("has_more"):
+            break
+
+        start_cursor = res_json.get("next_cursor")
+    data_objeto = {"results": all_results}
+    with open("respuestas.json", "w", encoding="utf-8") as f:
+        json.dump(data_objeto, f, indent=4, ensure_ascii=False)
+    print(f"Total de resultados: {len(all_results)}")
+    #print(response.json())
+    return data_objeto
 
 # ---------------------------
 # 4. PROCESAR DATOS
 # ---------------------------
 def procesar_datos(data):
+    """Procesa la estructura de Notion y devuelve un DataFrame de pandas"""
     rows = []
     for result in data["results"]:
-        props = result["properties"]
+        props = result.get("properties", {})
 
         nombre = ""
         if props.get("Nombre") and props["Nombre"]["title"]:
             nombre = props["Nombre"]["title"][0]["plain_text"]
             
-        cantidad = props.get("Cantidad").get("number")
+        cantidad = props.get("Cantidad", {}).get("number")
         
         fecha_gasto = ""
-        if props.get("Fecha del gasto").get("created_time"):
+        if props.get("Fecha del gasto") and props["Fecha del gasto"].get("created_time"):
             fecha_gasto = props["Fecha del gasto"]["created_time"]
             fecha_gasto = pd.to_datetime(fecha_gasto, errors="coerce")
 
         cuenta = ""
-        if props.get("Cuenta") and props["Cuenta"]["select"]:
+        if props.get("Cuenta") and props["Cuenta"].get("select"):
             cuenta = props["Cuenta"]["select"]["name"]
 
         categoria = ""
-        if props.get("Categoría") and props["Categoría"]["select"]:
+        if props.get("Categoría") and props["Categoría"].get("select"):
             categoria = props["Categoría"]["select"]["name"]
 
         formula = ""
-        if props.get("Fórmula") and props["Fórmula"]["formula"]:
-            formula = props["Fórmula"]["formula"]["string"]
+        if props.get("Fórmula") and props["Fórmula"].get("formula"):
+            formula = props["Fórmula"]["formula"].get("string", "")
 
         rows.append({
             "Nombre": nombre,
