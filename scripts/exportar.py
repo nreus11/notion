@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 import pandas as pd
 import plotly.express as px
 import hashlib  # Para verificar cambios
